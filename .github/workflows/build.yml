@@ -13,7 +13,7 @@ jobs:
       # Récupère CustomTools (version patchée) pour compiler ToolRepair contre lui
       - uses: actions/checkout@v4
         with:
-          repository: TON_PSEUDO/CustomTools   # <-- à remplacer
+          repository: LeVraiOslow/CustomTools   # <-- à remplacer
           path: CustomTools
           # token: ${{ secrets.CT_TOKEN }}     # <-- à décommenter si le dépôt est privé
 
