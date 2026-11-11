@@ -12,7 +12,10 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:26.2.build.+")
     // Vault (économie)
-    compileOnly("com.github.MilkBowl:VaultAPI:1.7")
+    compileOnly("com.github.MilkBowl:VaultAPI:1.7") {
+        // VaultAPI tire un vieux bukkit 1.13 qui entre en conflit avec paper-api
+        isTransitive = false
+    }
     // Ton plugin CustomTools (version PATCHÉE, voir README) : copie son jar dans le dossier libs/
     compileOnly(files("libs/CustomTools.jar"))
 }
