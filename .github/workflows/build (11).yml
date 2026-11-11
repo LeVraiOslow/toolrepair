@@ -1,0 +1,42 @@
+name: Build
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Récupère CustomTools (version patchée) pour compiler ToolRepair contre lui
+      - uses: actions/checkout@v4
+        with:
+          repository: TON_PSEUDO/CustomTools   # <-- à remplacer
+          path: CustomTools
+          # token: ${{ secrets.CT_TOKEN }}     # <-- à décommenter si le dépôt est privé
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.1.0'
+
+      - name: Build CustomTools
+        run: gradle build -p CustomTools
+
+      - name: Copier CustomTools.jar dans libs/
+        run: |
+          mkdir -p libs
+          cp CustomTools/build/libs/CustomTools.jar libs/CustomTools.jar
+
+      - run: gradle build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ToolRepair
+          path: build/libs/ToolRepair.jar
