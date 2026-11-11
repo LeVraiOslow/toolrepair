@@ -1,0 +1,31 @@
+name: Build
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.1.0'
+
+      # ToolRepair se compile contre CustomTools (version patchée) : le jar doit être commité dans libs/
+      - name: Vérifier libs/CustomTools.jar
+        run: test -f libs/CustomTools.jar || (echo "libs/CustomTools.jar manquant (jar de CustomTools patché)" && exit 1)
+
+      - run: gradle build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ToolRepair
+          path: build/libs/ToolRepair.jar
