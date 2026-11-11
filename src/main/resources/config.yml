@@ -1,0 +1,198 @@
+# ════════════════════════════════════════════════════════════════════
+#  ToolRepair - configuration
+#
+#  COULEURS (titres, noms, lores, messages) - tous les formats se mélangent :
+#    - codes Minecraft : &a &c &l (gras) &o (italique) &n &m &k &r
+#    - couleurs HTML   : &#RRGGBB  (ex: &#E87833)   ou   <#RRGGBB>
+#    - MiniMessage     : <red> <bold> <gradient:#ff0000:#0000ff>texte</gradient>
+#
+#  ITEMS (partout où il y a "item:") :
+#    - item Nexo      ->  "nexo:mon_item"     (ex: "nexo:orbre")
+#    - item vanilla   ->  GRAY_STAINED_GLASS_PANE  (ou "minecraft:gold_ingot")
+#    Pour un item Nexo, laisse "name" vide ("") pour garder son nom Nexo.
+#
+#  Commande : /toolrepair  (alias /reparation)   |  /toolrepair reload
+#  Permissions : toolrepair.use (défaut: tout le monde) / toolrepair.admin
+# ════════════════════════════════════════════════════════════════════
+
+# Outils CustomTools réparables (ids de la section "tools" de CustomTools).
+# Mets "*" pour autoriser tous les outils à durabilité custom.
+repairable-tools:
+  - mythique_hammer
+  - mythique_hoe
+  - mythique_axe
+  - mythique_pickaxe
+  - mythique_sword
+  - mythique_fishing_rod
+  - mythique_shovel
+  - spawner_pickaxe
+
+# true = on refuse de réparer un outil qui a déjà toute sa durabilité
+require-damaged: true
+
+# ───────────── Orbe de réparation ─────────────
+orb:
+  item: "nexo:orbre"   # nexo:xxx ou MATERIAL vanilla
+  amount: 1            # nombre d'orbes consommées par réparation
+
+# ───────────── Prix (monnaie Vault) ─────────────
+price:
+  default: 50000.0             # prix de base
+  per-tool:                    # prix par outil (id CustomTools) : remplace "default"
+    mythique_hammer: 100000.0
+    mythique_shovel: 75000.0
+    mythique_hoe: 50000.0
+    mythique_axe: 50000.0
+    mythique_pickaxe: 100000.0
+    mythique_sword: 100000.0
+    mythique_fishing_rod: 40000.0
+    spawner_pickaxe: 250000.0
+  scale-with-damage: false     # true = prix multiplié par la part de durabilité manquante
+  minimum: 0.0                 # prix plancher (utile avec scale-with-damage)
+
+# ───────────── Après une réparation réussie ─────────────
+on-success:
+  give-to-inventory: true      # true = l'outil neuf est donné au joueur ; false = reste dans le slot de l'outil
+  close-menu: true             # fermer le menu après la réparation
+
+# ───────────── Sons (clés vanilla, vide = aucun) ─────────────
+sounds:
+  open: "block.anvil.use"
+  pay: "entity.experience_orb.pickup"
+  success: "entity.player.levelup"
+  error: "entity.villager.no"
+
+# ════════════════════════════════════════════════════════════════════
+#  MENU
+#  Slots : 0 = haut-gauche ... 8 = haut-droite, puis ligne suivante 9-17, etc.
+#  rows = nombre de lignes (1 à 6). Les slots doivent rester < rows*9.
+#
+#  Placeholders disponibles dans les items des boutons :
+#    <price> prix formaté    <price_raw> prix brut    <balance> argent du joueur
+#    <tool> nom de l'outil   <current> <max> durabilité   <paid> montant déjà payé
+#    <orb_amount> orbes requises    <orb_have> orbes déposées
+# ════════════════════════════════════════════════════════════════════
+menu:
+  title: "&#E87833ꜰᴏʀɢᴇ &8» &fʀéᴘᴀʀᴀᴛɪᴏɴ"
+  rows: 3
+
+  slots:
+    tool: 11     # slot où le joueur dépose son outil
+    orb: 15      # slot où le joueur dépose l'orbe
+
+  # Remplissage de tous les slots libres
+  filler:
+    enabled: true
+    item: BLACK_STAINED_GLASS_PANE
+    name: " "
+
+  # Décorations / étiquettes : liste de slots + item. Ajoute-en autant que tu veux.
+  decorations:
+    tool-label:
+      slots: [2]
+      item: IRON_PICKAXE
+      name: "&#E87833&lᴏᴜᴛɪʟ"
+      lore:
+        - "&7Dépose ton outil mythique"
+        - "&7dans le slot en dessous."
+    info:
+      slots: [4]
+      item: BOOK
+      name: "&#FFD95C&lɪɴғᴏʀᴍᴀᴛɪᴏɴs"
+      lore:
+        - "&7Pour réparer entièrement un outil :"
+        - "&e1. &7Dépose l'outil et l'orbe"
+        - "&e2. &7Clique sur le prix pour payer"
+        - "&e3. &7Valide la fusion"
+    orb-label:
+      slots: [6]
+      item: "nexo:orbre"
+      name: "&#E87833&lᴏʀʙᴇ"
+      lore:
+        - "&7Dépose une &forbe de réparation"
+        - "&7dans le slot en dessous."
+
+  # Boutons : chaque bouton a plusieurs "states" (états) avec leur propre item/nom/lore.
+  #   click : type de clic requis (LEFT, RIGHT, SHIFT_LEFT, SHIFT_RIGHT, MIDDLE...)
+  buttons:
+    # Bouton prix : un clic récupère l'argent du joueur (remboursé s'il ferme le menu sans valider)
+    price:
+      slot: 13
+      click: LEFT
+      states:
+        no-tool:                       # aucun outil valide déposé
+          item: BARRIER
+          name: "&c&lᴀᴜᴄᴜɴ ᴏᴜᴛɪʟ"
+          lore:
+            - "&7Dépose un outil mythique"
+            - "&7à réparer dans le slot de gauche."
+        not-damaged:                   # outil déjà intact
+          item: LIME_DYE
+          name: "&a&lᴏᴜᴛɪʟ ɪɴᴛᴀᴄᴛ"
+          lore:
+            - "&7Cet outil a déjà toute"
+            - "&7sa durabilité."
+        unpaid:                        # prêt à être payé
+          item: GOLD_INGOT
+          name: "&#FFD95C&lᴘʀɪx : &f<price>"
+          lore:
+            - "&7Outil : <tool>"
+            - "&7Durabilité : &f<current>&7/&f<max>"
+            - ""
+            - "&7Ton solde : &f<balance>"
+            - ""
+            - "&e▶ Clic gauche pour payer"
+        paid:                          # déjà payé
+          item: EMERALD
+          glow: true
+          name: "&a&lᴘᴀʏé &8(&f<paid>&8)"
+          lore:
+            - "&7Le paiement est pris en compte."
+            - "&7Valide la fusion pour finir."
+
+    # Bouton de validation
+    confirm:
+      slot: 22
+      click: LEFT
+      states:
+        not-ready:
+          item: RED_STAINED_GLASS_PANE
+          name: "&c&lғᴜsɪᴏɴ ɪɴᴅɪsᴘᴏɴɪʙʟᴇ"
+          lore:
+            - "&7Il te faut :"
+            - "&8• &7un outil à réparer"
+            - "&8• &7<orb_amount> orbe(s) de réparation &8(<orb_have> déposée(s))"
+            - "&8• &7avoir payé le prix"
+        ready:
+          item: LIME_STAINED_GLASS_PANE
+          glow: true
+          name: "&a&lᴠᴀʟɪᴅᴇʀ ʟᴀ ғᴜsɪᴏɴ"
+          lore:
+            - "&7L'outil sera &aentièrement réparé&7."
+            - "&7L'orbe et l'argent seront consommés."
+            - ""
+            - "&e▶ Clic gauche pour valider"
+
+# ───────────── Messages ─────────────
+# Mets une valeur vide ("") pour désactiver un message.
+messages:
+  prefix: "&8[&6Réparation&8] &r"
+  no-permission: "&cTu n'as pas la permission."
+  player-only: "&cCommande réservée aux joueurs."
+  unknown-player: "&cJoueur introuvable."
+  reloaded: "&aConfiguration rechargée."
+  config-error: "&cMenu mal configuré, préviens un administrateur."
+  no-economy: "&cAucune économie disponible, préviens un administrateur."
+  wrong-tool: "&cSeuls les outils mythiques réparables peuvent être déposés ici."
+  wrong-orb: "&cSeule une orbe de réparation peut être déposée ici."
+  wrong-item: "&cCet item ne peut pas être utilisé dans ce menu."
+  no-tool: "&cDépose d'abord un outil à réparer."
+  tool-full: "&eCet outil a déjà toute sa durabilité."
+  already-paid: "&eTu as déjà payé."
+  not-enough-money: "&cIl te faut &f<price> &c(solde : &f<balance>&c)."
+  paid: "&a<price> &aprélevé(s). Valide la fusion pour réparer ton outil."
+  not-paid: "&cClique d'abord sur le prix pour payer."
+  orb-missing: "&cIl te faut <orb_amount> orbe(s) de réparation."
+  tool-changed: "&eL'outil a changé : paiement remboursé, clique de nouveau sur le prix."
+  refunded: "&e<price> &erembourse(s)."
+  success: "&aTon outil <tool> &aa été entièrement réparé !"

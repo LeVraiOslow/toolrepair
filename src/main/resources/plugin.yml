@@ -1,0 +1,19 @@
+name: ToolRepair
+version: 1.0.0
+main: fr.toolrepair.ToolRepair
+api-version: '26.2'
+description: Menu de réparation complète des outils CustomTools (orbe Nexo + monnaie Vault)
+depend: [CustomTools, Vault]
+softdepend: [Nexo]
+commands:
+  toolrepair:
+    description: Ouvre le menu de réparation des outils
+    usage: /toolrepair [reload]
+    aliases: [reparation, forgerepair]
+permissions:
+  toolrepair.use:
+    description: Utiliser le menu de réparation
+    default: true
+  toolrepair.admin:
+    description: Recharger la configuration / ouvrir le menu pour un autre joueur
+    default: op
